@@ -1,0 +1,25 @@
+{
+  "name": "deployer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "truffle test --debug"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devest-finance/deployer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/devest-finance/deployer/issues"
+  },
+  "homepage": "https://github.com/devest-finance/deployer#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.6.0",
+    "@truffle/hdwallet-provider": "^2.0.9",
+    "truffle": "^5.5.17",
+    "web3": "^1.7.3"
+  }
+}
