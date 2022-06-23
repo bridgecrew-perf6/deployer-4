@@ -1,66 +1,39 @@
-const DeVestFactory = artifacts.require("DeVestFactory");
-// const Child = artifacts.require("Child");
-// const MetaCoin = artifacts.require("MetaCoin");
-const performance = require("perf_hooks").performance;
-const fs = require('fs');
-const Web3 = require("web3");
+const DevestFactory = artifacts.require("DevestFactory");
+const DevestOne = artifacts.require("DevestOne");
 
-const NUMBER_OF_CHILDREN = 6;
-let indexes, deployer;
-
-contract("DeVestFactory", function (/* accounts */) {
-    before(async () => {
-        console.log("Before executing...")
-        indexes = [...Array(NUMBER_OF_CHILDREN).keys()]
-
-        // const web3 = new Web3();
-        // address = await web3.eth.accounts.create();
-        // console.log(address)
-        // console.log(address)
-    })
-
+contract("DeVestFactory", function (accounts) {
 
     describe.only("deploy contract", async () => {
 
         let deployer;
         beforeEach(async () => {
-            deployer = await DeVestFactory.deployed();
-            console.log("FoundationFactory DEPLOYED")
+            deployer = await DevestFactory.deployed();
         });
 
         it("should create new children", async () => {
-            console.log("Creating new children!");
-
             const gasUsed = [];
 
-            for(let one of indexes){
-                console.log(one)
-                const args = [
-                    '0xECF5A576A949aEE5915Afb60E0e62D09825Cd61B',
-                    "ERC20 Token",
-                    "TKO",
-                    // 5,
-                    // 750000000000
-                ]
-
-                const res = await deployer.issue(args[0], args[1], args[2]);
-
-                console.log(`tx: ${JSON.stringify(res)}`)
-                // console.log(`Gas used: ${res.receipt.gasUsed}`)
-                ///
-                // gasUsed.push(res.receipt.gasUsed);
-
+            for(let i=0;i<4;i++){
+                const res = await deployer.issue('0xECF5A576A949aEE5915Afb60E0e62D09825Cd61B', "TST Example", "TKO", { from: accounts[0] });
                 gasUsed.push(res.receipt.gasUsed);
             }
 
-            const result1 = await deployer.fetch.call();
+            const history = await deployer.history.call(0);
 
-            console.log("result1")
-            console.log(JSON.stringify(result1))
-
-            console.log("gasUsed")
-            console.log(gasUsed)
+            assert.equal(!history[3].startsWith("0x00000000"), true, "TST are not issued");
+            assert.equal(history[4].startsWith("0x00000000"), true, "Addresses should be free");
         });
+
+        it("Test tangible", async () => {
+            const history = await deployer.history.call(0);
+            const devestOne = await DevestOne.at(history[0]);
+
+            await devestOne.initialize(3000000000, 10, true, { from: accounts[0] });
+            await devestOne.setTangible(accounts[1], { from: accounts[0] });
+
+            const pricePerUnit = (await devestOne.price.call()).toNumber();
+            assert.equal(pricePerUnit, 3000000000 / 100, "Invalid price on initialized tangible");
+        })
 
 
     });
